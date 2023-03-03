@@ -1,0 +1,77 @@
+#Data Modeling
+def evaluate_model(model, x_test, y_test):
+    from sklearn import metrics
+
+    # Predict Test Data 
+    y_pred = model.predict(x_test)
+
+    # Calculate accuracy, precision, recall, f1-score, and kappa score
+    acc = metrics.accuracy_score(y_test, y_pred)
+    prec = metrics.precision_score(y_test, y_pred)
+    rec = metrics.recall_score(y_test, y_pred)
+    f1 = metrics.f1_score(y_test, y_pred)
+    kappa = metrics.cohen_kappa_score(y_test, y_pred)
+
+    # Calculate area under curve (AUC)
+    y_pred_proba = model.predict_proba(x_test)[::,1]
+    fpr, tpr, _ = metrics.roc_curve(y_test, y_pred_proba)
+    auc = metrics.roc_auc_score(y_test, y_pred_proba)
+
+    # Display confussion matrix
+    cm = metrics.confusion_matrix(y_test, y_pred)
+
+    return {'acc': acc, 'prec': prec, 'rec': rec, 'f1': f1, 'kappa': kappa, 
+            'fpr': fpr, 'tpr': tpr, 'auc': auc, 'cm': cm}
+            
+X_train
+
+# Building a model using KNeighborsClassifier 
+knn = KNeighborsClassifier(n_neighbors = 5)
+knn.fit(X_train, y_train)
+
+# Evaluate Model
+knn_eval = evaluate_model(knn, X_test, y_test)
+
+# Print result
+print('Accuracy:', knn_eval['acc'])
+print('Precision:', knn_eval['prec'])
+print('Recall:', knn_eval['rec'])
+print('F1 Score:', knn_eval['f1'])
+print('Cohens Kappa Score:', knn_eval['kappa'])
+print('Area Under Curve:', knn_eval['auc'])
+print('Confusion Matrix:\n', knn_eval['cm'])
+
+# Building Decision Tree model 
+clf = tree.DecisionTreeClassifier(random_state=0)
+clf.fit(X_train, y_train)
+
+# Evaluate Model
+clf_eval = evaluate_model(clf, X_test, y_test)
+
+# Print result
+print('Accuracy:', clf_eval['acc'])
+print('Precision:', clf_eval['prec'])
+print('Recall:', clf_eval['rec'])
+print('F1 Score:', clf_eval['f1'])
+print('Cohens Kappa Score:', clf_eval['kappa'])
+print('Area Under Curve:', clf_eval['auc'])
+print('Confusion Matrix:\n', clf_eval['cm'])# Evaluate Model
+
+#building logreg model
+from sklearn.linear_model import LogisticRegression
+from sklearn import metrics
+logreg = LogisticRegression()
+logreg.fit(X_train, y_train)
+
+# Evaluate Model
+logreg_eval = evaluate_model(logreg, X_test, y_test)
+
+# Print result
+print('Accuracy:', logreg_eval['acc'])
+print('Precision:', logreg_eval['prec'])
+print('Recall:', logreg_eval['rec'])
+print('F1 Score:', logreg_eval['f1'])
+print('Cohens Kappa Score:', logreg_eval['kappa'])
+print('Area Under Curve:', logreg_eval['auc'])
+print('Confusion Matrix:\n', logreg_eval['cm'])# Evaluate Model
+
