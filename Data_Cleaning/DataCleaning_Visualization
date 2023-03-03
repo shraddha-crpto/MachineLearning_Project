@@ -1,0 +1,186 @@
+#Import libraries
+import pandas as pd 
+import numpy as np
+
+
+%matplotlib inline
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn import tree
+
+from sklearn.metrics import confusion_matrix
+
+from sklearn.model_selection import train_test_split
+from sklearn.compose import make_column_transformer
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.compose import make_column_transformer
+from sklearn.preprocessing import StandardScaler 
+from sklearn import metrics
+
+#Read the dataset
+df = pd.read_csv('../input/personal-key-indicators-of-heart-disease/heart_2020_cleaned.csv')
+df.head()
+
+#Getting the summary of Numerical features
+df.describe().T.style.set_properties(**{'background-color': 'grey','color': 'white','border-color': 'white'})
+
+#Data Cleaning
+df.info() #get dataset info
+df.nunique() #get unique values of variables
+
+#Creating categorical variables
+df =  df[df.columns].replace({'Yes':1, 'No':0, 'Male':1,'Female':0,'No, borderline diabetes':'0','Yes (during pregnancy)':'1' })
+df['Diabetic'] = df['Diabetic'].astype(int)
+
+#visuaization of categorical features
+#1-SEX
+fig, ax = plt.subplots(figsize = (13,6))
+
+ax.hist(df[df["HeartDisease"]==1]["Sex"], bins=15, alpha=0.5, color="red", label="HeartDisease")
+ax.hist(df[df["HeartDisease"]==0]["Sex"], bins=15, alpha=0.5, color="#fccc79", label="Normal")
+
+ax.set_xlabel("Sex")
+ax.set_ylabel("Frequency")
+
+fig.suptitle("Distribution of Cases with Yes/No heartdisease according to Sex")
+
+ax.legend();  #Remember that number one refers to men and 0 refers to women on the x-axis.
+
+#2-Smoking
+fig, ax = plt.subplots(figsize = (13,6))
+
+ax.hist(df[df["HeartDisease"]==1]["Smoking"], bins=15, alpha=0.5, color="red", label="HeartDisease")
+ax.hist(df[df["HeartDisease"]==0]["Smoking"], bins=15, alpha=0.5, color="#fccc79", label="Normal")
+
+ax.set_xlabel("Smoking")
+ax.set_ylabel("Frequency")
+
+fig.suptitle("Distribution of Cases with Yes/No heartdisease according to being a smkoer or not.")
+
+ax.legend();
+
+#3- Race
+plt.figure(figsize = (13,6))
+sns.countplot( x= df['Race'], hue = 'HeartDisease', data = df, palette = 'YlOrBr')
+plt.xlabel('Race')
+plt.legend()
+plt.ylabel('Frequency')
+plt.show()
+
+#4- Age
+plt.figure(figsize = (13,6))
+sns.countplot(x = df['AgeCategory'], hue = 'HeartDisease', data = df, palette = 'YlOrBr')
+fig.suptitle("Distribution of Cases with Yes/No hartdisease according to AgeCategory")
+plt.xlabel('AgeCategory')
+plt.legend(['Normal','HeartDisease'])
+plt.ylabel('Frequency')
+plt.show()
+
+#5- Kidney disease
+fig, ax = plt.subplots(figsize = (13,6))
+
+ax.hist(df[df["HeartDisease"]==1]["KidneyDisease"], bins=15, alpha=0.5, color="red", label="HeartDisease")
+ax.hist(df[df["HeartDisease"]==0]["KidneyDisease"], bins=15, alpha=0.5, color="#fccc79", label="Normal")
+
+ax.set_xlabel("KidneyDisease")
+ax.set_ylabel("Frequency")
+
+fig.suptitle("Distribution of Cases with Yes/No heartdisease according to kidneydisease")
+
+ax.legend();
+
+#6- skin cancer
+fig, ax = plt.subplots(figsize = (13,6))
+
+ax.hist(df[df["HeartDisease"]==1]["SkinCancer"], bins=15, alpha=0.5, color="red", label="HeartDisease")
+ax.hist(df[df["HeartDisease"]==0]["SkinCancer"], bins=15, alpha=0.5, color="#fccc79", label="Normal")
+
+ax.set_xlabel("SkinCancer")
+ax.set_ylabel("Frequency")
+
+fig.suptitle("Distribution of Cases with Yes/No heartdisease based on previous exposure to skin cancer")
+
+ax.legend();
+
+#7- stroke
+fig, ax = plt.subplots(figsize = (13,6))
+
+ax.hist(df[df["HeartDisease"]==1]["Stroke"], bins=15, alpha=0.5, color="red", label="HeartDisease")
+ax.hist(df[df["HeartDisease"]==0]["Stroke"], bins=15, alpha=0.5, color="#fccc79", label="Normal")
+
+ax.set_xlabel("Stroke")
+ax.set_ylabel("Frequency")
+
+fig.suptitle("Distribution of Cases with Yes/No hartdisease based on previous exposure to Stroke")
+
+ax.legend();
+
+#8- Diabetic
+fig, ax = plt.subplots(figsize = (13,6))
+
+ax.hist(df[df["HeartDisease"]==1]["Diabetic"], bins=15, alpha=0.5, color="red", label="HeartDisease")
+ax.hist(df[df["HeartDisease"]==0]["Diabetic"], bins=15, alpha=0.5, color="#fccc79", label="Normal")
+
+ax.set_xlabel("Diabetic")
+ax.set_ylabel("Frequency")
+
+fig.suptitle("Distribution of Cases with Yes/No hartdisease based on previous exposure to Diabetic")
+
+ax.legend();
+
+# Visualization of numeric features using heat map correlation
+correlation = df.corr().round(2)
+plt.figure(figsize = (14,7))
+sns.heatmap(correlation, annot = True, cmap = 'YlOrBr')
+
+#distribution of features
+sns.set_style('white')
+sns.set_palette('YlOrBr')
+plt.figure(figsize = (13,6))
+plt.title('Distribution of correlation of features')
+abs(correlation['HeartDisease']).sort_values()[:-1].plot.barh()
+plt.show()
+
+#9- bmi
+fig, ax = plt.subplots(figsize = (13,5))
+sns.kdeplot(df[df["HeartDisease"]==1]["BMI"], alpha=0.5,shade = True, color="red", label="HeartDisease", ax = ax)
+sns.kdeplot(df[df["HeartDisease"]==0]["BMI"], alpha=0.5,shade = True, color="#fccc79", label="Normal", ax = ax)
+plt.title('Distribution of Body Mass Index', fontsize = 18)
+ax.set_xlabel("BodyMass")
+ax.set_ylabel("Frequency")
+ax.legend();
+plt.show()
+
+#10- sleep time
+fig, ax = plt.subplots(figsize = (13,5))
+sns.kdeplot(df[df["HeartDisease"]==1]["SleepTime"], alpha=0.5,shade = True, color="red", label="HeartDisease", ax = ax)
+sns.kdeplot(df[df["HeartDisease"]==0]["SleepTime"], alpha=0.5,shade = True, color="#fccc79", label="Normal", ax = ax)
+plt.title('Distribution of SleepTime values', fontsize = 18)
+ax.set_xlabel("SleepTime")
+ax.set_ylabel("Frequency")
+ax.legend();
+plt.show()
+
+#11- Physical Health
+fig, ax = plt.subplots(figsize = (13,5))
+sns.kdeplot(df[df["HeartDisease"]==1]["PhysicalHealth"], alpha=0.5,shade = True, color="red", label="HeartDisease", ax = ax)
+sns.kdeplot(df[df["HeartDisease"]==0]["PhysicalHealth"], alpha=0.5,shade = True, color="#fccc79", label="Normal", ax = ax)
+plt.title('Distribution of PhysicalHealth state for the last 30 days', fontsize = 18) # Read the introduction to know what the scale of numerical features mean
+ax.set_xlabel("PhysicalHealth")
+ax.set_ylabel("Frequency")
+ax.legend();
+plt.show()
+
+#12- Mental health
+fig, ax = plt.subplots(figsize = (13,5))
+sns.kdeplot(df[df["HeartDisease"]==1]["MentalHealth"], alpha=0.5,shade = True, color="red", label="HeartDisease", ax = ax)
+sns.kdeplot(df[df["HeartDisease"]==0]["MentalHealth"], alpha=0.5,shade = True, color="#fccc79", label="Normal", ax = ax)
+plt.title('Distribution of MenalHealth state for the last 30 days', fontsize = 18)
+ax.set_xlabel("MentalHealth")
+ax.set_ylabel("Frequency")
+ax.legend();
+plt.show()
+
+
